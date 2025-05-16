@@ -1,0 +1,7 @@
+Django
+djangorestframework==3.16.0
+requests==2.32.3
+psycopg2-binary==2.9.10
+gunicorn==23.0.0
+django-debug-toolbar
+djangorestframework-simplejwt
