@@ -126,6 +126,8 @@
                 android:inputType="textPassword"
                 android:textColorHint="@color/hintColor"
                 android:textColor="@color/inputText"
+                android:drawableEnd="@drawable/visibility_off_eye"
+                android:drawablePadding="10dp"
                 />
 
             <TextView
@@ -153,6 +155,8 @@
                 android:inputType="textPassword"
                 android:textColorHint="@color/hintColor"
                 android:textColor="@color/inputText"
+                android:drawableEnd="@drawable/visibility_off_eye"
+                android:drawablePadding="10dp"
                 />
 
             <ProgressBar

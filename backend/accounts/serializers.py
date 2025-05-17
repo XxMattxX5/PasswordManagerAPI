@@ -6,6 +6,21 @@ from django.contrib.auth import authenticate
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
+        """
+        Validate user credentials and enforce account lockout policy.
+
+        This method:
+        - Checks if the user account is currently locked and raises a PermissionDenied if so.
+        - Authenticates the user manually to intercept failed attempts.
+        - Increments login attempt count and applies lockout if necessary.
+        - Resets login attempts on successful authentication.
+        - Adds the user's encryption salt to the response payload.
+        - Removes the 'refresh' token from the response for frontend-managed refresh logic.
+
+        Raises:
+            PermissionDenied: If the user's account is locked.
+            ValidationError: If the credentials are invalid.
+        """
         username = attrs.get('username')
         password = attrs.get('password')
         user = User.objects.filter(username=username).first()

@@ -8,6 +8,7 @@ import base64
 
 User = get_user_model()
 
+# Creates and attaches profile when new user model is made
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:

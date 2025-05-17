@@ -1,7 +1,11 @@
 package com.example.password_manager.ui
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
+import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -23,6 +27,7 @@ import kotlinx.coroutines.launch
 import okhttp3.Response
 
 class CreatePasswordActivity: BaseActivity() {
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_password)
@@ -44,6 +49,8 @@ class CreatePasswordActivity: BaseActivity() {
 
         val btnCreate = findViewById<Button>(R.id.button5)
 
+        val passwordVisible = booleanArrayOf(false)
+
         btnCreate.setOnClickListener {
             val accountName = findViewById<EditText>(R.id.editTextText3).text.toString()
             val username = findViewById<EditText>(R.id.editTextText4).text.toString()
@@ -51,6 +58,37 @@ class CreatePasswordActivity: BaseActivity() {
 
             sendCreatePasswordRequest(accountName,username,password,folderId)
 
+        }
+
+        val editTextPassword = findViewById<EditText>(R.id.editTextTextPassword2)
+
+        editTextPassword.setOnTouchListener { v, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                val drawableEnd = 2
+                val drawable = editTextPassword.compoundDrawables[drawableEnd]
+                if (drawable != null) {
+                    val bounds = drawable.bounds
+                    val x = event.x.toInt()
+                    val width = editTextPassword.width
+
+                    if (x >= width - bounds.width() - editTextPassword.paddingEnd) {
+                        passwordVisible[0] = !passwordVisible[0]
+                        if (passwordVisible[0]) {
+                            editTextPassword.transformationMethod = HideReturnsTransformationMethod.getInstance()
+                            editTextPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.visibility_eye, 0)
+                        } else {
+                            editTextPassword.transformationMethod = PasswordTransformationMethod.getInstance()
+                            editTextPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+                                R.drawable.visibility_off_eye, 0)
+                        }
+                        editTextPassword.setSelection(editTextPassword.text.length)
+                        editTextPassword.performClick()
+                        return@setOnTouchListener true
+                    }
+                }
+            }
+            false
         }
 
     }

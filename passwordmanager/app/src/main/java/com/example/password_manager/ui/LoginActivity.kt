@@ -1,7 +1,6 @@
 package com.example.password_manager.ui
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.http.HttpException
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
@@ -24,13 +23,7 @@ import com.example.password_manager.utils.EncryptionManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-
-import org.threeten.bp.ZonedDateTime
-import org.threeten.bp.format.DateTimeFormatter
-import org.threeten.bp.ZoneId
-import org.threeten.bp.format.DateTimeParseException
 import java.text.SimpleDateFormat
-import java.time.OffsetDateTime
 import java.util.Locale
 import java.util.TimeZone
 
@@ -242,13 +235,6 @@ class LoginActivity: BaseActivity() {
                         progressBar.visibility = View.GONE
                     }
 
-
-
-//                    runOnUiThread {
-//                        Toast.makeText(this@LoginActivity, "Login failed: username or password are incorrect", Toast.LENGTH_SHORT).show()
-//                        btnSignIn.isEnabled = true
-//                        progressBar.visibility = View.GONE
-//                    }
                 }
             }
         })
