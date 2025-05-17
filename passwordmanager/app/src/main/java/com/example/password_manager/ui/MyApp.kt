@@ -9,6 +9,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.jakewharton.threetenabp.AndroidThreeTen
 
 class MyApp : Application() {
     private var authCheckJob: Job? = null
@@ -16,6 +17,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         startPeriodicAuthCheck()
+        AndroidThreeTen.init(this)
     }
 
     private fun startPeriodicAuthCheck() {

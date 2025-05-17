@@ -57,6 +57,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation("androidx.security:security-crypto:1.1.0-alpha03")
+    implementation("com.jakewharton.threetenabp:threetenabp:1.4.4")
 
 
 

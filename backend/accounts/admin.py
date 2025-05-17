@@ -10,7 +10,7 @@ class ProfileInline(admin.StackedInline):
     can_delete = False
     verbose_name_plural = 'Profile'
     fk_name = 'user'
-    fields = ('encryption_salt',)
+    fields = ('encryption_salt', "login_attempts", "locked_until")
     readonly_fields = ('encryption_salt',)
 
 class UserAdmin(DefaultUserAdmin):

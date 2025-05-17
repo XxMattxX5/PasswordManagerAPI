@@ -1,9 +1,11 @@
 package com.example.password_manager.ui
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.http.HttpException
 import android.os.Bundle
 import android.text.method.HideReturnsTransformationMethod
 import android.text.method.PasswordTransformationMethod
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
@@ -22,6 +24,15 @@ import com.example.password_manager.utils.EncryptionManager
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+
+import org.threeten.bp.ZonedDateTime
+import org.threeten.bp.format.DateTimeFormatter
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeParseException
+import java.text.SimpleDateFormat
+import java.time.OffsetDateTime
+import java.util.Locale
+import java.util.TimeZone
 
 
 class LoginActivity: BaseActivity() {
@@ -130,49 +141,140 @@ class LoginActivity: BaseActivity() {
             }
 
             override fun onResponse(call: Call, response: Response) {
-                val body = response.body?.string()
 
-                if (response.isSuccessful && body != null) {
-                    try {
-                        val json = JSONObject(body)
-                        val token = json.getString("access")
-                        val encryptSalt = json.getString("encryption_salt")
+                if (response.isSuccessful) {
+                    val body = response.body?.string()
+                    if (body != null) {
+                        try {
+                            val json = JSONObject(body)
+                            val token = json.getString("access")
+                            val encryptSalt = json.getString("encryption_salt")
 
-                        AuthManager.saveToken(this@LoginActivity, token)
-                        AuthManager.isLogged = true
+                            AuthManager.saveToken(this@LoginActivity, token)
+                            AuthManager.isLogged = true
 
-                        CoroutineScope(Dispatchers.IO).launch {
-                            val key = EncryptionManager.deriveKey(password, encryptSalt.toByteArray(Charsets.UTF_8))
-                            EncryptionManager.storeDerivedKey(this@LoginActivity, key)
-                        }
+                            CoroutineScope(Dispatchers.IO).launch {
+                                val key = EncryptionManager.deriveKey(
+                                    password,
+                                    encryptSalt.toByteArray(Charsets.UTF_8)
+                                )
+                                EncryptionManager.storeDerivedKey(this@LoginActivity, key)
+                            }
 
-                        runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Login successful!", Toast.LENGTH_SHORT).show()
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Login successful!",
+                                    Toast.LENGTH_SHORT
+                                ).show()
 
-                            val intent = Intent(this@LoginActivity, PasswordListActivity::class.java)
-                            startActivity(intent)
-                            finish()
+                                val intent =
+                                    Intent(this@LoginActivity, PasswordListActivity::class.java)
+                                startActivity(intent)
+                                finish()
 
-                            btnSignIn.isEnabled = true
-                            progressBar.visibility = View.GONE
-                        }
+                                btnSignIn.isEnabled = true
+                                progressBar.visibility = View.GONE
+                            }
 
-                    } catch (e: JSONException) {
-                        e.printStackTrace()
-                        runOnUiThread {
-                            Toast.makeText(this@LoginActivity, "Response parsing error", Toast.LENGTH_SHORT).show()
-                            btnSignIn.isEnabled = true
-                            progressBar.visibility = View.GONE
+                        } catch (e: JSONException) {
+                            e.printStackTrace()
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Response parsing error",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                btnSignIn.isEnabled = true
+                                progressBar.visibility = View.GONE
+                            }
                         }
                     }
                 } else {
-                    runOnUiThread {
-                        Toast.makeText(this@LoginActivity, "Login failed: username or password are incorrect", Toast.LENGTH_SHORT).show()
+                    val errorBody = response.body?.string()
+
+
+                    if (response.code == 403 && errorBody != null) {
+                        try {
+                            val json = JSONObject(errorBody)
+                            if (json.has("time")) {
+                                val lockTimeUtc = json.getString("time")
+                                Log.d("loginTime", lockTimeUtc)
+                                val formattedTime = formatUtcToLocal(lockTimeUtc + "Z")
+                                Log.d("loginFormatted", formattedTime)
+                                runOnUiThread {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Account locked until: $formattedTime",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                                }
+                            } else {
+                                runOnUiThread {
+                                    Toast.makeText(
+                                        this@LoginActivity,
+                                        "Access forbidden.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                        } catch (e: JSONException) {
+                            runOnUiThread {
+                                Toast.makeText(
+                                    this@LoginActivity,
+                                    "Login failed: Could not parse server response.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                    } else {
+                        runOnUiThread {
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "Login failed: username or password are incorrect",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+
+                    runOnUiThread{
                         btnSignIn.isEnabled = true
                         progressBar.visibility = View.GONE
                     }
+
+
+
+//                    runOnUiThread {
+//                        Toast.makeText(this@LoginActivity, "Login failed: username or password are incorrect", Toast.LENGTH_SHORT).show()
+//                        btnSignIn.isEnabled = true
+//                        progressBar.visibility = View.GONE
+//                    }
                 }
             }
         })
     }
+
+    fun formatUtcToLocal(utcTimeString: String): String {
+        return try {
+            // Clean input as before
+            val cleaned = if (utcTimeString.matches(Regex(".*\\+\\d{2}:\\d{2}Z$"))) {
+                utcTimeString.dropLast(1)
+            } else {
+                utcTimeString
+            }
+            val noFraction = cleaned.replace(Regex("\\.\\d+"), "")
+
+            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX", Locale.getDefault())
+            sdf.timeZone = TimeZone.getTimeZone("UTC")
+            val date = sdf.parse(noFraction)
+
+            // 12-hour format with AM/PM = "hh:mm:ss a"
+            val outputSdf = SimpleDateFormat("yyyy-MM-dd hh:mm:ss a z", Locale.getDefault())
+            outputSdf.timeZone = TimeZone.getDefault()
+            outputSdf.format(date!!)
+        } catch (e: Exception) {
+            utcTimeString
+        }
+    }
+
 }
