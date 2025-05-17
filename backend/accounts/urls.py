@@ -23,5 +23,6 @@ urlpatterns = [
     path('', views.home, name="home"),
     path('auth/login/', views.CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/validate/', views.CheckAuthentication.as_view(), name='check_authentication'),
+    path("auth/register/", views.RegisterUser.as_view(), name="register"),
 
 ]
