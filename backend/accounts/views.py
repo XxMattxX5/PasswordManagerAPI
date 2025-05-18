@@ -1,20 +1,34 @@
 from django.shortcuts import render, HttpResponse
 from rest_framework.views import APIView
-from rest_framework import status
+from rest_framework import status, permissions
 from rest_framework.response import Response
 from .serializers import CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import IsAuthenticated
 from .forms import UserRegistrationForm
 from django.contrib.auth.models import User
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 
 # Create your views here.
 def home(request):
     return HttpResponse("Ok")
 
-class CustomTokenObtainPairView(TokenObtainPairView):
-    serializer_class = CustomTokenObtainPairSerializer
+class CustomTokenView(TokenObtainPairView):
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = CustomTokenObtainPairSerializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            return Response(e.detail, status=status.HTTP_401_UNAUTHORIZED)
+        except PermissionDenied as e:
+            return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
+
+
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class CheckAuthentication(APIView):
     permission_classes = [IsAuthenticated]

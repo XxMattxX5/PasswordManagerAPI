@@ -32,6 +32,17 @@ if CSRF_TRUSTED_ORIGINS:
 else:
     CSRF_TRUSTED_ORIGINS = []
 
+
+def show_toolbar(request):                                     
+    return True 
+
+if DEBUG:
+    DEBUG_TOOLBAR_CONFIG = {                                       
+        "SHOW_TOOLBAR_CALLBACK" : show_toolbar,                    
+}    
+    
+INTERNAL_IPS = os.getenv("DJANGO_ALLOWED_HOSTS", "").split(",")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -43,10 +54,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "accounts.apps.AccountsConfig",
     "passwords.apps.PasswordsConfig",
+    'rest_framework',
+    "debug_toolbar",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
