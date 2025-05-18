@@ -12,7 +12,7 @@ from rest_framework.exceptions import ValidationError, PermissionDenied
 
 # Create your views here.
 def home(request):
-    return HttpResponse("Ok")
+    return render(request, "accounts/home.html")
 
 class CustomTokenView(TokenObtainPairView):
     permission_classes = [permissions.AllowAny]

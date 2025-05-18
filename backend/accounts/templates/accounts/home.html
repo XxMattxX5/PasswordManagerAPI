@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Password Manager API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{% static 'accounts/images' %}/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{% static 'accounts/images' %}/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{% static 'accounts/images' %}/favicon-16x16.png"
+    />
+    <link
+      rel="manifest"
+      href="{% static 'accounts/images/site.webmanifest' %}/site.webmanifest"
+    />
+    <link rel="stylesheet" href="{% static 'accounts'%}/style.css" />
+  </head>
+  <body>
+    <div id="home_app_image_gallery_container">
+      <h1>App Image Gallery</h1>
+      <p>
+        <strong>Disclaimer</strong>: This app was created as a personal project
+        for learning and experimentation purposes. It is not intended for public
+        use, and no guarantees are made regarding its reliability, security, or
+        ongoing support.
+      </p>
+      <div id="home_app_image_gallery_content">
+        <div class="home_app_image_box">
+          <h2>Home Page</h2>
+          <img src="{% static 'accounts/images/Home.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Register Page</h2>
+          <img src="{% static 'accounts/images/Register.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Login Page</h2>
+          <img src="{% static 'accounts/images/Login.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Password List Page</h2>
+          <img src="{% static 'accounts/images/Password_list.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Create Folder Page</h2>
+          <img src="{% static 'accounts/images/Create_Folder.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Create Password Page</h2>
+          <img src="{% static 'accounts/images/Create_Password.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Update Folder Page</h2>
+          <img src="{% static 'accounts/images/Update_Folder.jpg' %}" />
+        </div>
+        <div class="home_app_image_box">
+          <h2>Update Password Page</h2>
+          <img src="{% static 'accounts/images/Update_Password.jpg' %}" />
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
