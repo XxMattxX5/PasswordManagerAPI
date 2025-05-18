@@ -27,7 +27,6 @@ class CustomTokenView(TokenObtainPairView):
         except PermissionDenied as e:
             return Response(e.detail, status=status.HTTP_403_FORBIDDEN)
 
-
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 class CheckAuthentication(APIView):
