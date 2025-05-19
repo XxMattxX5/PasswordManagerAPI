@@ -4,6 +4,7 @@ import os
 import base64
 from datetime import timedelta
 from django.utils import timezone
+from django.db.models import F
 
 
 # Create your models here.
@@ -48,20 +49,30 @@ class Profile(models.Model):
             attempts_per_lock (int): Number of failed attempts before each lockout.
             lockout_base_minutes (int): Base lockout duration in minutes. Multiplied by the lockout tier.
         """
-        self.login_attempts += 1
+        # Atomically increment login_attempts in the database
+        self.login_attempts = F('login_attempts') + 1
+        self.save(update_fields=['login_attempts'])
+        
+        # Refresh from DB to get the incremented value in Python
+        self.refresh_from_db(fields=['login_attempts'])
+
         if self.login_attempts % attempts_per_lock == 0:
             lockout_multiplier = self.login_attempts // attempts_per_lock
             lockout_minutes = lockout_base_minutes * lockout_multiplier
             self.locked_until = timezone.now() + timedelta(minutes=lockout_minutes)
-        self.save()
+            self.save(update_fields=['locked_until', 'login_attempts'])
+        
+        
+        
 
     def reset_login_attempts(self):
         """
         Resets the login attempt counter and removes any account lockout.
         """
-        self.login_attempts = 0
-        self.locked_until = None
-        self.save()
+        if self.login_attempts != 0 or self.locked_until is not None:
+            self.login_attempts = 0
+            self.locked_until = None
+            self.save(update_fields=['login_attempts', 'locked_until'])
 
     def __str__(self):
         return self.user.username
